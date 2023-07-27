@@ -1,0 +1,4 @@
+rmmod ftdi_sio
+rmmod usbserial
+modprobe -r cp210x
+rmmod usbserial
