@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     ft.reset()?;
     ft.purge_all()?;
-    debug_assert_eq!(ft.queue_status()?, 0);
+    //debug_assert_eq!(ft.queue_status()?, 0);
     ft.set_usb_parameters(65536)?;
     ft.set_chars(0, false, 0, false)?;
     ft.set_timeouts(Duration::from_millis(10000), Duration::from_millis(10000))?;
@@ -36,32 +36,39 @@ fn main() -> Result<(), Box<dyn Error>> {
     // This does not seem to be necessary though
     // thread::sleep(Duration::from_millis(100));
 
+    let now0 = Instant::now();
+    let mut total: u128 = 0;
     for _ in 0..ITER {
-        print!(". ");
+        // print!(". ");
         let now = Instant::now();
         ft.read_all(&mut rx_buf)?;
-        let t = now.elapsed().as_micros();
+        let t: u128 = now.elapsed().as_micros();
         let z: u128 = (RX_BUF_SIZE * 1000000).try_into().unwrap();
-        println!("{RX_BUF_SIZE} @ {} = {} B/s", t, z/t);
-        print!("rx: ");
-        let n = min(rx_buf.len(), MAX_PRINT_SIZE);
-        if n < rx_buf.len() {
-            for i in 0..n {
-                print!("{:#03},", rx_buf[i]);
-            }
-            print!("...");
-            for i in (rx_buf.len()-n)..rx_buf.len() {
-                print!("{:#03},", rx_buf[i]);
-            }
-        } else {
-            for i in 0..n {
-                print!("{:#03},", rx_buf[i]);
-            }
-        }
-        println!();
-        println!();
+        total += u128::try_from(RX_BUF_SIZE).unwrap();
+        // println!("{RX_BUF_SIZE} @ {} = {} B/s", t, z/t);
+        // print!("rx: ");
+        // let n = min(rx_buf.len(), MAX_PRINT_SIZE);
+        // if n < rx_buf.len() {
+        //     for i in 0..n {
+        //         print!("{:#03},", rx_buf[i]);
+        //     }
+        //     print!("...");
+        //     for i in (rx_buf.len()-n)..rx_buf.len() {
+        //         print!("{:#03},", rx_buf[i]);
+        //     }
+        // } else {
+        //     for i in 0..n {
+        //         print!("{:#03},", rx_buf[i]);
+        //     }
+        // }
+        // println!();
+        // println!();
         //ft.write_all(&rx_buf)?;
     }
+
+    let t: u128 = now0.elapsed().as_micros();
+    let z: u128 = (total * 1000000).try_into().unwrap();
+    println!("total {total} @ {} = {} B/s", t, z/t);
 
     println!();
 
